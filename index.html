@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>
+SFX HEATMAP
+</title>
+
+<link rel="stylesheet"
+href="style.css">
+
+<link rel="preconnect"
+href="https://fonts.googleapis.com">
+
+<link rel="preconnect"
+href="https://fonts.gstatic.com"
+crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+rel="stylesheet">
+
+</head>
+
+<body>
+
+<div class="overlay"></div>
+
+<audio id="clickSound">
+<source src="click.mp3" type="audio/mpeg">
+</audio>
+
+<header>
+
+<div class="logo-box">
+
+<div>
+
+<h1>
+SFX HEATMAP
+</h1>
+
+<p>
+Institutional Options Flow
+</p>
+
+</div>
+
+</div>
+
+<div class="menu-container">
+
+<button id="menuBtn">
+
+HOME ☰
+
+</button>
+
+<div class="dropdown-menu">
+
+<a
+href="https://www.forexfactory.com/calendar"
+target="_blank">
+
+📅 Economic Calendar
+
+</a>
+
+<a
+href="https://t.me/sfxacademic19"
+target="_blank">
+
+👥 Join Community
+
+</a>
+
+<a
+href="https://sfxspace.id/"
+target="_blank">
+
+💎 Trakteer Support
+
+</a>
+
+</div>
+
+</div>
+
+</header>
+
+<section class="pair-dropdown-wrap">
+
+<select id="pairSelect">
+
+<option value="XAUUSD">
+XAUUSD
+</option>
+
+<option value="EURUSD">
+EURUSD
+</option>
+
+<option value="GBPUSD">
+GBPUSD
+</option>
+
+<option value="USDJPY">
+USDJPY
+</option>
+
+<option value="AUDUSD">
+AUDUSD
+</option>
+
+<option value="BTCUSD">
+BTCUSD
+</option>
+
+<option value="ETHUSD">
+ETHUSD
+</option>
+
+</select>
+
+</section>
+
+<section class="stats-grid">
+
+<div class="stat-box">
+
+<h3>
+CALL VOLUME
+</h3>
+
+<h2 id="callVolume">
+96K
+</h2>
+
+</div>
+
+<div class="stat-box">
+
+<h3>
+PUT VOLUME
+</h3>
+
+<h2 id="putVolume">
+96K
+</h2>
+
+</div>
+
+<div class="stat-box">
+
+<h3>
+SENTIMENT
+</h3>
+
+<h2 class="bullish">
+Bullish
+</h2>
+
+</div>
+
+<div class="stat-box">
+
+<h3>
+LIVE PRICE
+</h3>
+
+<h2 id="livePrice">
+4376.20
+</h2>
+
+</div>
+
+</section>
+
+<section class="analysis-box">
+
+<input
+type="number"
+id="manualPrice"
+placeholder="Enter Current Price">
+
+<button id="analyzeBtn">
+
+ANALYZE AREA
+
+</button>
+
+</section>
+
+<section class="result-box">
+
+<div class="result-card">
+
+<h3>
+STRONG CALL AREA
+</h3>
+
+<h2 id="callArea">
+4350
+</h2>
+
+</div>
+
+<div class="result-card">
+
+<h3>
+STRONG PUT AREA
+</h3>
+
+<h2 id="putArea">
+4390
+</h2>
+
+</div>
+
+</section>
+
+<section class="heatmap-box">
+
+<div class="heatmap-header">
+
+<div>STRIKE</div>
+<div>CALL HEAT</div>
+<div>PUT HEAT</div>
+
+</div>
+
+<div id="heatmapRows"></div>
+
+</section>
+
+<script src="script.js"></script>
+
+</body>
+</html>
