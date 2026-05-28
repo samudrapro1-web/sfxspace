@@ -1,415 +1,471 @@
-const apiKey =
-"2e17930862544ff2a98735e8bac44bdf";
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
 
-const forexPairs = {
+body{
 
-XAUUSD:"XAU/USD",
-EURUSD:"EUR/USD",
-GBPUSD:"GBP/USD",
-USDJPY:"USD/JPY",
-AUDUSD:"AUD/USD"
+background:
+linear-gradient(
+rgba(0,0,0,0.82),
+rgba(0,0,0,0.82)
+),
+url("1000031163.jpg");
 
-};
+background-size:cover;
+background-position:center;
+background-attachment:fixed;
 
-const cryptoPairs = {
+font-family:'Inter',sans-serif;
 
-BTCUSD:"BTCUSDT",
-ETHUSD:"ETHUSDT"
+color:white;
 
-};
+padding:25px;
 
-const pairSelect =
-document.getElementById(
-"pairSelect"
-);
-
-const heatmapRows =
-document.getElementById(
-"heatmapRows"
-);
-
-const clickSound =
-document.getElementById(
-"clickSound"
-);
-
-function playClick(){
-
-clickSound.currentTime = 0;
-clickSound.play();
+overflow-x:hidden;
 
 }
 
-pairSelect.addEventListener(
-"change",
-()=>{
+.overlay{
 
-playClick();
+position:fixed;
+inset:0;
 
-renderHeatmap(
-pairSelect.value
-);
-
-}
-);
-
-async function getForexPrice(pair){
-
-try{
-
-const response =
-await fetch(
-
-`https://api.twelvedata.com/price?symbol=${pair}&apikey=${apiKey}`
-
-);
-
-const data =
-await response.json();
-
-if(data.price){
-
-return Number(data.price);
-
-}
-
-return null;
-
-}catch{
-
-return null;
-
-}
-
-}
-
-async function getCryptoPrice(symbol){
-
-try{
-
-const response =
-await fetch(
-
-`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`
-
-);
-
-const data =
-await response.json();
-
-return Number(data.price);
-
-}catch{
-
-return null;
-
-}
-
-}
-
-async function getLivePrice(pair){
-
-if(
-cryptoPairs[pair]
-){
-
-return await getCryptoPrice(
-cryptoPairs[pair]
-);
-
-}
-
-if(
-forexPairs[pair]
-){
-
-return await getForexPrice(
-forexPairs[pair]
-);
-
-}
-
-return null;
-
-}
-
-async function renderHeatmap(pair){
-
-const livePrice =
-await getLivePrice(pair);
-
-if(!livePrice){
-
-document.getElementById(
-"livePrice"
-).innerText =
-"Offline";
-
-return;
-
-}
-
-document.getElementById(
-"livePrice"
-).innerText =
-
-livePrice > 1000
-? livePrice.toFixed(2)
-: livePrice.toFixed(4);
-
-heatmapRows.innerHTML = "";
-
-let strikes = [];
-
-let step;
-
-if(livePrice > 1000){
-
-step = livePrice * 0.0015;
-
-}else{
-
-step = livePrice * 0.0008;
-
-}
-
-for(let i=-2;i<=2;i++){
-
-const strike =
-livePrice + (i * step);
-
-strikes.push({
-
-strike:
-
-livePrice > 1000
-? strike.toFixed(2)
-: strike.toFixed(4),
-
-call:
-Math.floor(
-Math.random()*40+60
+background:
+radial-gradient(
+circle at top left,
+rgba(0,255,150,0.12),
+transparent 40%
 ),
 
-put:
-Math.floor(
-Math.random()*40+60
-)
+radial-gradient(
+circle at bottom right,
+rgba(255,0,80,0.12),
+transparent 40%
+);
 
-});
+z-index:-1;
 
 }
 
-let strongestCall =
-strikes[0];
+header{
 
-let strongestPut =
-strikes[0];
+display:flex;
+justify-content:space-between;
+align-items:center;
 
-strikes.forEach(level=>{
+margin-bottom:25px;
 
-if(level.call > strongestCall.call){
-
-strongestCall = level;
+gap:20px;
 
 }
 
-if(level.put > strongestPut.put){
+.logo-box h1{
 
-strongestPut = level;
-
-}
-
-const row =
-document.createElement(
-"div"
-);
-
-row.classList.add(
-"heatmap-row"
-);
-
-row.innerHTML = `
-
-<div>
-${level.strike}
-</div>
-
-<div class="bar">
-
-<div
-class="fill-call"
-style="
-width:${level.call}%;
-">
-</div>
-
-</div>
-
-<div class="bar">
-
-<div
-class="fill-put"
-style="
-width:${level.put}%;
-">
-</div>
-
-</div>
-
-`;
-
-heatmapRows.appendChild(
-row
-);
-
-});
-
-document.getElementById(
-"callVolume"
-).innerText =
-strongestCall.call + "K";
-
-document.getElementById(
-"putVolume"
-).innerText =
-strongestPut.put + "K";
-
-document.getElementById(
-"callArea"
-).innerText =
-strongestCall.strike;
-
-document.getElementById(
-"putArea"
-).innerText =
-strongestPut.strike;
-
-const sentiment =
-strongestCall.call >
-strongestPut.put
-? "Bullish"
-: "Bearish";
-
-const sentimentEl =
-document.querySelector(
-".bullish"
-);
-
-sentimentEl.innerText =
-sentiment;
-
-if(sentiment === "Bullish"){
-
-sentimentEl.style.color =
-"#00ff95";
-
-}else{
-
-sentimentEl.style.color =
-"#ff3366";
+font-size:34px;
+font-weight:800;
 
 }
 
-}
+.logo-box p{
 
-document.getElementById(
-"analyzeBtn"
-).addEventListener(
-"click",
-()=>{
-
-playClick();
-
-const price =
-Number(
-document.getElementById(
-"manualPrice"
-).value
-);
-
-if(!price) return;
-
-const callArea =
-price + (price * 0.003);
-
-const putArea =
-price - (price * 0.003);
-
-document.getElementById(
-"callArea"
-).innerText =
-callArea.toFixed(2);
-
-document.getElementById(
-"putArea"
-).innerText =
-putArea.toFixed(2);
-
-}
-);
-
-const menuBtn =
-document.getElementById(
-"menuBtn"
-);
-
-const dropdownMenu =
-document.querySelector(
-".dropdown-menu"
-);
-
-menuBtn.addEventListener(
-"click",
-(e)=>{
-
-playClick();
-
-e.stopPropagation();
-
-if(
-dropdownMenu.style.display
-=== "flex"
-){
-
-dropdownMenu.style.display =
-"none";
-
-}else{
-
-dropdownMenu.style.display =
-"flex";
+color:#9ca3af;
 
 }
 
-}
-);
+.menu-container{
 
-window.addEventListener(
-"click",
-(e)=>{
-
-if(
-!menuBtn.contains(e.target)
-&&
-!dropdownMenu.contains(e.target)
-){
-
-dropdownMenu.style.display =
-"none";
+position:relative;
+z-index:99999;
 
 }
 
-});
+#menuBtn{
 
-renderHeatmap(
-"XAUUSD"
+background:
+linear-gradient(
+135deg,
+#00ff95,
+#00c3ff
 );
 
-setInterval(()=>{
+border:none;
 
-renderHeatmap(
-pairSelect.value
+padding:15px 24px;
+
+border-radius:18px;
+
+font-weight:700;
+
+cursor:pointer;
+
+color:black;
+
+}
+
+.dropdown-menu{
+
+position:absolute;
+
+top:70px;
+right:0;
+
+width:250px;
+
+background:
+rgba(10,10,20,0.96);
+
+border:
+1px solid rgba(255,255,255,0.08);
+
+border-radius:24px;
+
+padding:14px;
+
+display:none;
+
+flex-direction:column;
+
+gap:12px;
+
+backdrop-filter:blur(18px);
+
+z-index:99999;
+
+}
+
+.dropdown-menu a{
+
+text-decoration:none;
+
+color:white;
+
+padding:15px;
+
+border-radius:16px;
+
+background:
+rgba(255,255,255,0.05);
+
+}
+
+.pair-dropdown-wrap{
+
+margin-bottom:25px;
+
+}
+
+#pairSelect{
+
+width:100%;
+
+padding:18px 20px;
+
+border:none;
+
+outline:none;
+
+border-radius:22px;
+
+background:
+rgba(255,255,255,0.06);
+
+color:white;
+
+font-size:16px;
+font-weight:700;
+
+border:
+1px solid rgba(255,255,255,0.08);
+
+appearance:none;
+
+}
+
+#pairSelect option{
+
+background:#0b0f19;
+color:white;
+
+}
+
+.stats-grid{
+
+display:grid;
+
+grid-template-columns:
+repeat(auto-fit,minmax(220px,1fr));
+
+gap:20px;
+
+margin-bottom:25px;
+
+}
+
+.stat-box{
+
+background:
+rgba(255,255,255,0.04);
+
+border:
+1px solid rgba(255,255,255,0.08);
+
+border-radius:24px;
+
+padding:24px;
+
+backdrop-filter:blur(12px);
+
+}
+
+.stat-box h3{
+
+color:#9ca3af;
+
+margin-bottom:10px;
+
+}
+
+.stat-box h2{
+
+font-size:34px;
+font-weight:800;
+
+}
+
+.bullish{
+
+color:#00ff95;
+
+}
+
+.analysis-box{
+
+display:flex;
+gap:15px;
+
+margin-bottom:25px;
+
+}
+
+.analysis-box input{
+
+flex:1;
+
+padding:18px;
+
+border:none;
+outline:none;
+
+border-radius:18px;
+
+background:
+rgba(255,255,255,0.05);
+
+color:white;
+
+font-size:16px;
+
+}
+
+.analysis-box button{
+
+padding:18px 26px;
+
+border:none;
+
+border-radius:18px;
+
+background:
+linear-gradient(
+135deg,
+#00ff95,
+#00c3ff
 );
 
-},4000);
+font-weight:700;
+
+cursor:pointer;
+
+}
+
+.result-box{
+
+display:grid;
+
+grid-template-columns:
+repeat(auto-fit,minmax(240px,1fr));
+
+gap:20px;
+
+margin-bottom:25px;
+
+}
+
+.result-card{
+
+background:
+rgba(255,255,255,0.04);
+
+border:
+1px solid rgba(255,255,255,0.08);
+
+border-radius:24px;
+
+padding:24px;
+
+backdrop-filter:blur(12px);
+
+}
+
+.result-card h3{
+
+color:#9ca3af;
+
+margin-bottom:10px;
+
+}
+
+.result-card h2{
+
+font-size:34px;
+font-weight:800;
+
+}
+
+.heatmap-box{
+
+background:
+rgba(255,255,255,0.04);
+
+border:
+1px solid rgba(255,255,255,0.08);
+
+border-radius:24px;
+
+overflow:hidden;
+
+backdrop-filter:blur(12px);
+
+}
+
+.heatmap-header{
+
+display:grid;
+
+grid-template-columns:
+1fr 2fr 2fr;
+
+padding:20px;
+
+background:
+rgba(255,255,255,0.05);
+
+font-weight:700;
+
+}
+
+.heatmap-row{
+
+display:grid;
+
+grid-template-columns:
+1fr 2fr 2fr;
+
+gap:16px;
+
+align-items:center;
+
+padding:20px;
+
+border-top:
+1px solid rgba(255,255,255,0.05);
+
+}
+
+.bar{
+
+height:24px;
+
+background:
+rgba(255,255,255,0.05);
+
+border-radius:999px;
+
+overflow:hidden;
+
+}
+
+.fill-call{
+
+height:100%;
+
+background:
+linear-gradient(
+90deg,
+#00ff95,
+#00c3ff
+);
+
+}
+
+.fill-put{
+
+height:100%;
+
+background:
+linear-gradient(
+90deg,
+#ff3366,
+#ff0033
+);
+
+}
+
+@media(max-width:768px){
+
+body{
+padding:18px;
+}
+
+header{
+
+flex-direction:column;
+align-items:flex-start;
+
+}
+
+.stats-grid{
+
+grid-template-columns:1fr;
+
+}
+
+.analysis-box{
+
+flex-direction:column;
+
+}
+
+.analysis-box button{
+
+width:100%;
+
+}
+
+.heatmap-header{
+
+display:none;
+
+}
+
+.heatmap-row{
+
+grid-template-columns:1fr;
+
+gap:12px;
+
+}
+
+}
