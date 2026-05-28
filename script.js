@@ -1,23 +1,20 @@
 const apiKey =
 "2e17930862544ff2a98735e8bac44bdf";
 
-const heatmapData = {
+const forexPairs = {
 
-XAUUSD: {
+XAUUSD:"XAU/USD",
+EURUSD:"EUR/USD",
+GBPUSD:"GBP/USD",
+USDJPY:"USD/JPY",
+AUDUSD:"AUD/USD"
 
-price: 4376.20,
+};
 
-strikes: [
+const cryptoPairs = {
 
-{ strike:'4350', call:96, put:18 },
-{ strike:'4360', call:82, put:30 },
-{ strike:'4370', call:68, put:52 },
-{ strike:'4380', call:44, put:74 },
-{ strike:'4390', call:26, put:96 }
-
-]
-
-}
+BTCUSD:"BTCUSDT",
+ETHUSD:"ETHUSDT"
 
 };
 
@@ -56,45 +53,170 @@ pairSelect.value
 }
 );
 
-function renderHeatmap(pair){
+async function getForexPrice(pair){
+
+try{
+
+const response =
+await fetch(
+
+`https://api.twelvedata.com/price?symbol=${pair}&apikey=${apiKey}`
+
+);
 
 const data =
-heatmapData[pair];
+await response.json();
 
-if(!data) return;
+if(data.price){
 
-document.getElementById(
-"livePrice"
-).innerText =
-data.price;
+return Number(data.price);
 
-heatmapRows.innerHTML = "";
+}
 
-let strongestCall =
-data.strikes[0];
+return null;
 
-let strongestPut =
-data.strikes[0];
+}catch{
 
-data.strikes.forEach(level=>{
+return null;
+
+}
+
+}
+
+async function getCryptoPrice(symbol){
+
+try{
+
+const response =
+await fetch(
+
+`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`
+
+);
+
+const data =
+await response.json();
+
+return Number(data.price);
+
+}catch{
+
+return null;
+
+}
+
+}
+
+async function getLivePrice(pair){
 
 if(
-level.call >
-strongestCall.call
+cryptoPairs[pair]
 ){
 
-strongestCall =
-level;
+return await getCryptoPrice(
+cryptoPairs[pair]
+);
 
 }
 
 if(
-level.put >
-strongestPut.put
+forexPairs[pair]
 ){
 
-strongestPut =
-level;
+return await getForexPrice(
+forexPairs[pair]
+);
+
+}
+
+return null;
+
+}
+
+async function renderHeatmap(pair){
+
+const livePrice =
+await getLivePrice(pair);
+
+if(!livePrice){
+
+document.getElementById(
+"livePrice"
+).innerText =
+"Offline";
+
+return;
+
+}
+
+document.getElementById(
+"livePrice"
+).innerText =
+
+livePrice > 1000
+? livePrice.toFixed(2)
+: livePrice.toFixed(4);
+
+heatmapRows.innerHTML = "";
+
+let strikes = [];
+
+let step;
+
+if(livePrice > 1000){
+
+step = livePrice * 0.0015;
+
+}else{
+
+step = livePrice * 0.0008;
+
+}
+
+for(let i=-2;i<=2;i++){
+
+const strike =
+livePrice + (i * step);
+
+strikes.push({
+
+strike:
+
+livePrice > 1000
+? strike.toFixed(2)
+: strike.toFixed(4),
+
+call:
+Math.floor(
+Math.random()*40+60
+),
+
+put:
+Math.floor(
+Math.random()*40+60
+)
+
+});
+
+}
+
+let strongestCall =
+strikes[0];
+
+let strongestPut =
+strikes[0];
+
+strikes.forEach(level=>{
+
+if(level.call > strongestCall.call){
+
+strongestCall = level;
+
+}
+
+if(level.put > strongestPut.put){
+
+strongestPut = level;
 
 }
 
@@ -283,3 +405,11 @@ dropdownMenu.style.display =
 renderHeatmap(
 "XAUUSD"
 );
+
+setInterval(()=>{
+
+renderHeatmap(
+pairSelect.value
+);
+
+},4000);
