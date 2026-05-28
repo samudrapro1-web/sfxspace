@@ -1,505 +1,604 @@
-const apiKey =
-"2e17930862544ff2a98735e8bac44bdf";
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
 
-const forexPairs = {
+body{
 
-XAUUSD:"XAU/USD",
-EURUSD:"EUR/USD",
-GBPUSD:"GBP/USD",
-USDJPY:"USD/JPY",
-AUDUSD:"AUD/USD"
+background:
+linear-gradient(
+rgba(0,0,0,0.82),
+rgba(0,0,0,0.82)
+),
+url("1000031163.jpg");
 
-};
+background-size:cover;
+background-position:center;
+background-attachment:fixed;
 
-const cryptoPairs = {
+font-family:'Inter',sans-serif;
 
-BTCUSD:"BTCUSDT",
-ETHUSD:"ETHUSDT"
+color:white;
 
-};
+padding:25px;
 
-const pairSelect =
-document.getElementById(
-"pairSelect"
-);
-
-const heatmapRows =
-document.getElementById(
-"heatmapRows"
-);
-
-const clickSound =
-document.getElementById(
-"clickSound"
-);
-
-function playClick(){
-
-clickSound.currentTime = 0;
-clickSound.play();
+overflow-x:hidden;
 
 }
 
-pairSelect.addEventListener(
-"change",
-()=>{
+.overlay{
 
-playClick();
+position:fixed;
+inset:0;
 
-renderHeatmap(
-pairSelect.value
-);
-
-changeTradingViewChart(
-pairSelect.value
-);
-
-}
-);
-
-async function getForexPrice(pair){
-
-try{
-
-const response =
-await fetch(
-
-`https://api.twelvedata.com/price?symbol=${encodeURIComponent(pair)}&apikey=${apiKey}`
-
-);
-
-const data =
-await response.json();
-
-console.log(data);
-
-if(data.price){
-
-return parseFloat(data.price);
-
-}
-
-return null;
-
-}catch(error){
-
-console.log(error);
-
-return null;
-
-}
-
-}
-
-async function getCryptoPrice(symbol){
-
-try{
-
-const response =
-await fetch(
-
-`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`
-
-);
-
-const data =
-await response.json();
-
-return Number(data.price);
-
-}catch{
-
-return null;
-
-}
-
-}
-
-async function getLivePrice(pair){
-
-if(
-cryptoPairs[pair]
-){
-
-return await getCryptoPrice(
-cryptoPairs[pair]
-);
-
-}
-
-if(
-forexPairs[pair]
-){
-
-return await getForexPrice(
-forexPairs[pair]
-);
-
-}
-
-return null;
-
-}
-
-async function renderHeatmap(pair){
-
-const livePrice =
-await getLivePrice(pair);
-
-if(!livePrice){
-
-document.getElementById(
-"livePrice"
-).innerText =
-"Loading...";
-
-return;
-
-}
-
-document.getElementById(
-"livePrice"
-).innerText =
-
-livePrice > 1000
-? livePrice.toFixed(2)
-: livePrice.toFixed(4);
-
-heatmapRows.innerHTML = "";
-
-let strikes = [];
-
-let step;
-
-if(livePrice > 1000){
-
-step = livePrice * 0.0015;
-
-}else{
-
-step = livePrice * 0.0008;
-
-}
-
-for(let i=-2;i<=2;i++){
-
-const strike =
-livePrice + (i * step);
-
-strikes.push({
-
-strike:
-
-livePrice > 1000
-? strike.toFixed(2)
-: strike.toFixed(4),
-
-call:
-Math.floor(
-Math.random()*40+60
+background:
+radial-gradient(
+circle at top left,
+rgba(0,255,150,0.12),
+transparent 40%
 ),
 
-put:
-Math.floor(
-Math.random()*40+60
-)
-
-});
-
-}
-
-let strongestCall =
-strikes[0];
-
-let strongestPut =
-strikes[0];
-
-strikes.forEach(level=>{
-
-if(level.call > strongestCall.call){
-
-strongestCall = level;
-
-}
-
-if(level.put > strongestPut.put){
-
-strongestPut = level;
-
-}
-
-const row =
-document.createElement(
-"div"
+radial-gradient(
+circle at bottom right,
+rgba(255,0,80,0.12),
+transparent 40%
 );
 
-row.classList.add(
-"heatmap-row"
+z-index:-1;
+
+}
+
+header{
+
+display:flex;
+justify-content:space-between;
+align-items:flex-start;
+
+margin-bottom:25px;
+
+gap:20px;
+
+}
+
+.logo-box h1{
+
+font-size:34px;
+font-weight:800;
+
+}
+
+.logo-box p{
+
+color:#9ca3af;
+
+}
+
+.menu-container{
+
+position:relative;
+z-index:99999;
+
+margin-top:5px;
+
+}
+
+#menuBtn{
+
+min-width:90px;
+height:46px;
+
+font-size:12px;
+
+padding:0 18px;
+
+border:none;
+
+border-radius:14px;
+
+font-weight:700;
+
+cursor:pointer;
+
+background:
+linear-gradient(
+135deg,
+#00ff95,
+#00c3ff
 );
 
-row.innerHTML = `
+color:black;
 
-<div>
-${level.strike}
-</div>
+}
 
-<div class="bar">
+.dropdown-menu{
 
-<div
-class="fill-call"
-style="
-width:${level.call}%;
-">
-</div>
+position:absolute;
 
-</div>
+top:60px;
+right:0;
 
-<div class="bar">
+width:250px;
 
-<div
-class="fill-put"
-style="
-width:${level.put}%;
-">
-</div>
+background:
+rgba(10,10,20,0.96);
 
-</div>
+border:
+1px solid rgba(255,255,255,0.08);
 
-`;
+border-radius:24px;
 
-heatmapRows.appendChild(
-row
+padding:14px;
+
+display:none;
+
+flex-direction:column;
+
+gap:12px;
+
+backdrop-filter:blur(18px);
+
+z-index:99999;
+
+}
+
+.dropdown-menu a{
+
+text-decoration:none;
+
+color:white;
+
+padding:15px;
+
+border-radius:16px;
+
+background:
+rgba(255,255,255,0.05);
+
+}
+
+.pair-dropdown-wrap{
+
+margin-bottom:25px;
+
+}
+
+#pairSelect{
+
+width:100%;
+
+padding:18px 20px;
+
+border:none;
+
+outline:none;
+
+border-radius:22px;
+
+background:
+rgba(255,255,255,0.06);
+
+color:white;
+
+font-size:16px;
+font-weight:700;
+
+border:
+1px solid rgba(255,255,255,0.08);
+
+appearance:none;
+
+}
+
+#pairSelect option{
+
+background:#0b0f19;
+color:white;
+
+}
+
+.stats-grid{
+
+display:grid;
+
+grid-template-columns:
+repeat(auto-fit,minmax(220px,1fr));
+
+gap:20px;
+
+margin-bottom:25px;
+
+}
+
+.stat-box{
+
+background:
+rgba(255,255,255,0.04);
+
+border:
+1px solid rgba(255,255,255,0.08);
+
+border-radius:24px;
+
+padding:24px;
+
+backdrop-filter:blur(12px);
+
+}
+
+.stat-box h3{
+
+color:#9ca3af;
+
+margin-bottom:10px;
+
+}
+
+.stat-box h2{
+
+font-size:34px;
+font-weight:800;
+
+}
+
+.bullish{
+
+color:#00ff95;
+
+}
+
+.analysis-box{
+
+display:flex;
+gap:15px;
+
+margin-bottom:25px;
+
+}
+
+.analysis-box input{
+
+flex:1;
+
+padding:18px;
+
+border:none;
+outline:none;
+
+border-radius:18px;
+
+background:
+rgba(255,255,255,0.05);
+
+color:white;
+
+font-size:16px;
+
+}
+
+.analysis-box button{
+
+padding:18px 26px;
+
+border:none;
+
+border-radius:18px;
+
+background:
+linear-gradient(
+135deg,
+#00ff95,
+#00c3ff
 );
 
-});
+font-weight:700;
 
-document.getElementById(
-"callVolume"
-).innerText =
-strongestCall.call + "K";
+cursor:pointer;
 
-document.getElementById(
-"putVolume"
-).innerText =
-strongestPut.put + "K";
+}
 
-document.getElementById(
-"callArea"
-).innerText =
-strongestCall.strike;
+.result-box{
 
-document.getElementById(
-"putArea"
-).innerText =
-strongestPut.strike;
+display:grid;
 
-const sentiment =
-strongestCall.call >
-strongestPut.put
-? "Bullish"
-: "Bearish";
+grid-template-columns:
+repeat(auto-fit,minmax(240px,1fr));
 
-const sentimentEl =
-document.querySelector(
-".bullish"
+gap:20px;
+
+margin-bottom:25px;
+
+}
+
+.result-card{
+
+background:
+rgba(255,255,255,0.04);
+
+border:
+1px solid rgba(255,255,255,0.08);
+
+border-radius:24px;
+
+padding:24px;
+
+backdrop-filter:blur(12px);
+
+}
+
+.result-card h3{
+
+color:#9ca3af;
+
+margin-bottom:10px;
+
+}
+
+.result-card h2{
+
+font-size:34px;
+font-weight:800;
+
+}
+
+.institutional-grid{
+
+display:grid;
+
+grid-template-columns:
+repeat(auto-fit,minmax(220px,1fr));
+
+gap:20px;
+
+margin-top:25px;
+margin-bottom:25px;
+
+}
+
+.institutional-card{
+
+background:
+rgba(255,255,255,0.04);
+
+border:
+1px solid rgba(255,255,255,0.08);
+
+border-radius:24px;
+
+padding:24px;
+
+backdrop-filter:blur(12px);
+
+position:relative;
+
+overflow:hidden;
+
+}
+
+.institutional-card::before{
+
+content:"";
+
+position:absolute;
+
+inset:0;
+
+background:
+linear-gradient(
+135deg,
+rgba(0,255,150,0.08),
+rgba(255,0,80,0.05)
 );
 
-sentimentEl.innerText =
-sentiment;
-
-if(sentiment === "Bullish"){
-
-sentimentEl.style.color =
-"#00ff95";
-
-}else{
-
-sentimentEl.style.color =
-"#ff3366";
+pointer-events:none;
 
 }
 
-}
+.institutional-card h3{
 
-document.getElementById(
-"analyzeBtn"
-).addEventListener(
-"click",
-()=>{
+color:#9ca3af;
 
-playClick();
+margin-bottom:12px;
 
-const price =
-Number(
-document.getElementById(
-"manualPrice"
-).value
-);
-
-if(!price) return;
-
-const callArea =
-price + (price * 0.003);
-
-const putArea =
-price - (price * 0.003);
-
-document.getElementById(
-"callArea"
-).innerText =
-callArea.toFixed(2);
-
-document.getElementById(
-"putArea"
-).innerText =
-putArea.toFixed(2);
-
-}
-);
-
-const menuBtn =
-document.getElementById(
-"menuBtn"
-);
-
-const dropdownMenu =
-document.querySelector(
-".dropdown-menu"
-);
-
-menuBtn.addEventListener(
-"click",
-(e)=>{
-
-playClick();
-
-e.stopPropagation();
-
-if(
-dropdownMenu.style.display
-=== "flex"
-){
-
-dropdownMenu.style.display =
-"none";
-
-}else{
-
-dropdownMenu.style.display =
-"flex";
+font-size:14px;
 
 }
 
-}
-);
+.institutional-card h2{
 
-window.addEventListener(
-"click",
-(e)=>{
+font-size:34px;
+font-weight:800;
 
-if(
-!menuBtn.contains(e.target)
-&&
-!dropdownMenu.contains(e.target)
-){
-
-dropdownMenu.style.display =
-"none";
+margin-bottom:10px;
 
 }
 
-});
+.institutional-card p{
 
-function loadTradingView(symbol){
+color:#9ca3af;
 
-new TradingView.widget({
-
-width:"100%",
-height:500,
-
-symbol:symbol,
-
-interval:"15",
-
-timezone:"Asia/Jakarta",
-
-theme:"dark",
-
-style:"1",
-
-locale:"en",
-
-toolbar_bg:"#0b0f19",
-
-enable_publishing:false,
-
-hide_top_toolbar:false,
-
-allow_symbol_change:true,
-
-container_id:"tradingview_chart"
-
-});
+font-size:13px;
 
 }
 
-function changeTradingViewChart(pair){
+.heatmap-box{
 
-let tvSymbol =
-"OANDA:XAUUSD";
+background:
+rgba(255,255,255,0.04);
 
-if(pair === "EURUSD"){
-tvSymbol = "OANDA:EURUSD";
+border:
+1px solid rgba(255,255,255,0.08);
+
+border-radius:24px;
+
+overflow:hidden;
+
+backdrop-filter:blur(12px);
+
+margin-top:25px;
+
 }
 
-if(pair === "GBPUSD"){
-tvSymbol = "OANDA:GBPUSD";
+.heatmap-header{
+
+display:grid;
+
+grid-template-columns:
+1fr 2fr 2fr;
+
+padding:20px;
+
+background:
+rgba(255,255,255,0.05);
+
+font-weight:700;
+
 }
 
-if(pair === "USDJPY"){
-tvSymbol = "OANDA:USDJPY";
+.heatmap-row{
+
+display:grid;
+
+grid-template-columns:
+1fr 2fr 2fr;
+
+gap:16px;
+
+align-items:center;
+
+padding:20px;
+
+border-top:
+1px solid rgba(255,255,255,0.05);
+
 }
 
-if(pair === "AUDUSD"){
-tvSymbol = "OANDA:AUDUSD";
+.bar{
+
+height:24px;
+
+background:
+rgba(255,255,255,0.05);
+
+border-radius:999px;
+
+overflow:hidden;
+
 }
 
-if(pair === "BTCUSD"){
-tvSymbol = "BINANCE:BTCUSDT";
-}
+.fill-call{
 
-if(pair === "ETHUSD"){
-tvSymbol = "BINANCE:ETHUSDT";
-}
+height:100%;
 
-document.getElementById(
-"tradingview_chart"
-).innerHTML = "";
-
-loadTradingView(
-tvSymbol
+background:
+linear-gradient(
+90deg,
+#00ff95,
+#00c3ff
 );
 
 }
 
-async function startRealtime(){
+.fill-put{
 
-await renderHeatmap(
-pairSelect.value
+height:100%;
+
+background:
+linear-gradient(
+90deg,
+#ff3366,
+#ff0033
 );
-
-changeTradingViewChart(
-pairSelect.value
-);
-
-setInterval(async()=>{
-
-await renderHeatmap(
-pairSelect.value
-);
-
-},3000);
 
 }
 
-startRealtime();
+.chart-box{
+
+margin-top:30px;
+
+background:
+rgba(255,255,255,0.04);
+
+border:
+1px solid rgba(255,255,255,0.08);
+
+border-radius:24px;
+
+padding:20px;
+
+backdrop-filter:blur(12px);
+
+overflow:hidden;
+
+}
+
+.chart-header{
+
+margin-bottom:20px;
+
+}
+
+.chart-header h2{
+
+font-size:24px;
+font-weight:800;
+
+}
+
+#tradingview_chart{
+
+width:100%;
+height:500px;
+
+border-radius:20px;
+
+overflow:hidden;
+
+}
+
+@media(max-width:768px){
+
+body{
+padding:18px;
+}
+
+header{
+
+flex-direction:column;
+align-items:flex-start;
+
+}
+
+.stats-grid{
+
+grid-template-columns:1fr;
+
+}
+
+.analysis-box{
+
+flex-direction:column;
+
+}
+
+.analysis-box button{
+
+width:100%;
+
+}
+
+.heatmap-header{
+
+display:none;
+
+}
+
+.heatmap-row{
+
+grid-template-columns:1fr;
+
+gap:12px;
+
+}
+
+}
