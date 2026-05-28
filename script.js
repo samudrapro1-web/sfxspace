@@ -64,22 +64,26 @@ try{
 const response =
 await fetch(
 
-`https://api.twelvedata.com/price?symbol=${pair}&apikey=${apiKey}`
+`https://api.twelvedata.com/price?symbol=${encodeURIComponent(pair)}&apikey=${apiKey}`
 
 );
 
 const data =
 await response.json();
 
+console.log(data);
+
 if(data.price){
 
-return Number(data.price);
+return parseFloat(data.price);
 
 }
 
 return null;
 
-}catch{
+}catch(error){
+
+console.log(error);
 
 return null;
 
@@ -147,7 +151,7 @@ if(!livePrice){
 document.getElementById(
 "livePrice"
 ).innerText =
-"Offline";
+"Loading...";
 
 return;
 
@@ -445,45 +449,27 @@ let tvSymbol =
 "OANDA:XAUUSD";
 
 if(pair === "EURUSD"){
-
-tvSymbol =
-"OANDA:EURUSD";
-
+tvSymbol = "OANDA:EURUSD";
 }
 
 if(pair === "GBPUSD"){
-
-tvSymbol =
-"OANDA:GBPUSD";
-
+tvSymbol = "OANDA:GBPUSD";
 }
 
 if(pair === "USDJPY"){
-
-tvSymbol =
-"OANDA:USDJPY";
-
+tvSymbol = "OANDA:USDJPY";
 }
 
 if(pair === "AUDUSD"){
-
-tvSymbol =
-"OANDA:AUDUSD";
-
+tvSymbol = "OANDA:AUDUSD";
 }
 
 if(pair === "BTCUSD"){
-
-tvSymbol =
-"BINANCE:BTCUSDT";
-
+tvSymbol = "BINANCE:BTCUSDT";
 }
 
 if(pair === "ETHUSD"){
-
-tvSymbol =
-"BINANCE:ETHUSDT";
-
+tvSymbol = "BINANCE:ETHUSDT";
 }
 
 document.getElementById(
